@@ -16,15 +16,15 @@ defmodule Bus do
     :world
   end
   
-  def get(day, month, year) do 
+  def get(ymd) do 
     url = "www.btransit.org/rss.aspx?type=4&cat=37&custom=791"
     body = HTTPoison.get!(url).body
     File.write("/home/knathan2/Documents/bus/lib/service.html", body)
     {:ok, feed, _} = FeederEx.parse(body)
     entries = Enum.map(feed.entries, fn entry -> {entry.title, entry.updated} end)
 
-    userTime = "Fri, " <> day <> " " <> month <> " " <> year <> " 00:00:00 GMT"
-    {:ok, userTime} = Timex.parse(userTime, "{RFC1123}")
+    userTime = ymd <> "T00:00:00+00:00"
+    {:ok, userTime, 0} = DateTime.from_iso8601(userTime)
 
     result = compTime(userTime, entries, "")
     result
